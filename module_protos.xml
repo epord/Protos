@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_protos" default="compile.module.protos">
+  <dirname property="module.protos.basedir" file="${ant.file.module_protos}"/>
+  
+  <property name="module.jdk.home.protos" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.protos" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.protos" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.protos" value="-encoding UTF-8 -source 8 -target 8 ${compiler.args}"/>
+  
+  <property name="protos.output.dir" value="${module.protos.basedir}/out/production/Protos"/>
+  <property name="protos.testoutput.dir" value="${module.protos.basedir}/out/test/Protos"/>
+  
+  <path id="protos.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="protos.module.production.classpath">
+    <path refid="${module.jdk.classpath.protos}"/>
+  </path>
+  
+  <path id="protos.runtime.production.module.classpath">
+    <pathelement location="${protos.output.dir}"/>
+  </path>
+  
+  <path id="protos.module.classpath">
+    <path refid="${module.jdk.classpath.protos}"/>
+    <pathelement location="${protos.output.dir}"/>
+  </path>
+  
+  <path id="protos.runtime.module.classpath">
+    <pathelement location="${protos.testoutput.dir}"/>
+    <pathelement location="${protos.output.dir}"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.protos">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.protos">
+    <patternset refid="excluded.from.module.protos"/>
+  </patternset>
+  
+  <path id="protos.module.sourcepath">
+    <dirset dir="${module.protos.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.protos" depends="compile.module.protos.production,compile.module.protos.tests" description="Compile module Protos"/>
+  
+  <target name="compile.module.protos.production" depends="register.custom.compilers" description="Compile module Protos; production classes">
+    <mkdir dir="${protos.output.dir}"/>
+    <javac2 destdir="${protos.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.protos}/javac">
+      <compilerarg line="${compiler.args.protos}"/>
+      <bootclasspath refid="protos.module.bootclasspath"/>
+      <classpath refid="protos.module.production.classpath"/>
+      <src refid="protos.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.protos"/>
+    </javac2>
+    
+    <copy todir="${protos.output.dir}">
+      <fileset dir="${module.protos.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.protos.tests" depends="register.custom.compilers,compile.module.protos.production" description="compile module Protos; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.protos" description="cleanup module">
+    <delete dir="${protos.output.dir}"/>
+    <delete dir="${protos.testoutput.dir}"/>
+  </target>
+</project>
